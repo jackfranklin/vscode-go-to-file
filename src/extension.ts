@@ -44,23 +44,20 @@ const openDocument = (
     jsConfig
   );
 
-  potentialPathsToFile.then((paths: vscode.Uri[]) => {
-    // console.log("got paths", paths);
-  });
-
-  //   if (existsSync(p)) {
-  //     vscode.workspace.openTextDocument(p).then(iDoc => {
-  //       if (iDoc !== undefined) {
-  //         vscode.window.showTextDocument(iDoc).then(iEditor => {
-  //           if (fileAndLine.line !== -1) {
-  //             let range = iEditor.document.lineAt(fileAndLine.line - 1).range;
-  //             iEditor.selection = new vscode.Selection(range.start, range.end);
-  //             iEditor.revealRange(range, vscode.TextEditorRevealType.InCenter);
-  //           }
-  //         });
-  //       }
-  //     });
-  //   }
+  potentialPathsToFile
+    .then((paths: vscode.Uri[]) => {
+      // just pick the first one
+      return paths.find(p => fs.existsSync(p.fsPath));
+    })
+    .then((path?: vscode.Uri) => {
+      if (!path) {
+        // TODO: show an error message? Or go back and try another path?
+        return;
+      }
+      vscode.workspace.openTextDocument(path).then(doc => {
+        vscode.window.showTextDocument(doc);
+      });
+    });
 };
 
 const getJsConfig = (editor: vscode.TextEditor): JsConfig | undefined => {
@@ -82,7 +79,6 @@ const getJsConfig = (editor: vscode.TextEditor): JsConfig | undefined => {
 const execute = (editor?: vscode.TextEditor) => {
   if (!editor) return;
   const jsConfig = getJsConfig(editor);
-  console.log("got js config", jsConfig);
 
   for (let i: number = 0; i < editor.selections.length; i++) {
     const word = getWordRange(editor, editor.selections[0]);
@@ -96,17 +92,15 @@ export function activate(context: vscode.ExtensionContext) {
   // The command has been defined in the package.json file
   // Now provide the implementation of the command with  registerCommand
   // The commandId parameter must match the command field in package.json
-  let disposable = vscode.commands.registerCommand("extension.sayHello", () => {
-    // The code you place here will be executed every time your command is executed
-
-    execute(vscode.window.activeTextEditor);
-
-    // Display a message box to the user
-    // vscode.window.showInformationMessage("Hello World!");
-  });
+  let disposable = vscode.commands.registerCommand(
+    "vscodeGoToFile.goToFile",
+    () => {
+      // The code you place here will be executed every time your command is executed
+      execute(vscode.window.activeTextEditor);
+    }
+  );
 
   context.subscriptions.push(disposable);
 }
 
-// this method is called when your extension is deactivated
 export function deactivate() {}

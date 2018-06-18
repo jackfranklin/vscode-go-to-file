@@ -1,8 +1,8 @@
 "use strict";
 
 import * as vscode from "vscode";
-import { dirname, join, isAbsolute, parse, relative } from "path";
-import { existsSync, statSync } from "fs";
+import { dirname, join, isAbsolute, parse } from "path";
+import { statSync } from "fs";
 import { JsConfig } from "./jsconfig";
 import * as mm from "micromatch";
 
@@ -86,18 +86,11 @@ export class FileOperations {
       }
 
       // if we don't have a jsconfig, we can make a reasonable guess...
-
       const fileAsRelativePath = vscode.workspace.asRelativePath(wordPath);
 
       const relativePatternForGlob = new vscode.RelativePattern(
         currentWorkSpace,
         `${fileAsRelativePath}*`
-      );
-
-      console.log(
-        "got current workspace",
-        currentWorkSpace.uri.fsPath,
-        fileAsRelativePath
       );
 
       return vscode.workspace
@@ -115,39 +108,30 @@ export class FileOperations {
     matchingPathKey: string,
     jsConfig: JsConfig
   ): Thenable<vscode.Uri[]> {
-    console.log("got import matching jsconfig path", wordPath, matchingPathKey);
-
     const potentialPaths = jsConfig.compilerOptions.paths![matchingPathKey];
-    console.log("potentialpaths", potentialPaths);
 
-    Promise.all(
-      potentialPaths.map(potentialPath => {
-        const matchedFromGlob = mm.capture(matchingPathKey, wordPath);
+    // TODO: a better solution here tries all potentialPaths until we find something
+    // but for now this will do...
+    const potentialPath = potentialPaths[0];
 
-        if (!matchedFromGlob) return Promise.resolve([]);
+    const matchedFromGlob = mm.capture(matchingPathKey, wordPath);
 
-        const newPotentialPath = potentialPath
-          .replace("./", "")
-          .replace("*", matchedFromGlob[0]);
-        console.log("new potential path", newPotentialPath);
+    if (!matchedFromGlob) return Promise.resolve([]);
 
-        const relativePatternForGlob = new vscode.RelativePattern(
-          currentWorkSpace,
-          `${newPotentialPath}*`
-        );
-        console.log("got relative pattern for glob", relativePatternForGlob);
+    const newPotentialPath = potentialPath
+      .replace("./", "")
+      .replace("*", matchedFromGlob[0]);
 
-        return vscode.workspace
-          .findFiles(relativePatternForGlob, null, 5)
-          .then(results => {
-            return results.filter(r => r.fsPath !== currentEditorFile);
-          });
-      })
-    ).then((responses: vscode.Uri[][]) => {
-      console.log("got responses", responses);
-    });
+    const relativePatternForGlob = new vscode.RelativePattern(
+      currentWorkSpace,
+      `${newPotentialPath}*`
+    );
 
-    return Promise.resolve([]);
+    return vscode.workspace
+      .findFiles(relativePatternForGlob, null, 5)
+      .then(results => {
+        return results.filter(r => r.fsPath !== currentEditorFile);
+      });
   }
 
   private static findPathForRelativeFile(

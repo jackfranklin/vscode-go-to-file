@@ -10,7 +10,6 @@ export class TextOperations {
     let end = raw.length;
     let start = 0;
     let tmp = "";
-    let newLine = false;
     let txt: string[] = [];
     while (start <= end) {
       if (raw[start] === "\n" || raw[start] === "\r") {
@@ -64,7 +63,6 @@ export class TextOperations {
     iText: string,
     iSelection: vscode.Selection
   ): string {
-    let bounds: RegExp = new RegExp("[\\s\\\"\\'\\>\\<#]");
     if (iText === undefined || iText === "") return "";
     return iText.substring(
       iSelection.start.character,
