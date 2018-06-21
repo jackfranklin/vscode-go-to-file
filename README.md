@@ -4,6 +4,8 @@ A plugin that aims to replicate some of Vim's "go to file" (`gf`) functionality.
 
 A huge amount of credit goes to [fr43nk/seito-openfile](https://github.com/fr43nk/seito-openfile), whose plugin I used for the base of my work. I preferred to build my version as a standalone plugin in order to give me a plugin to work with as I learn more of the VSCode extension API.
 
+Install from the VSCode market place: https://marketplace.visualstudio.com/items?itemName=jackfranklin.vscode-go-to-file
+
 ## Features
 
 When your cursor is hovering over a file path, invoke this plugin to be taken to that file. For example, given this code:
