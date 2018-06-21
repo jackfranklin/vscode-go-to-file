@@ -1,65 +1,44 @@
-# vscode-go-to-file README
+# vscode-go-to-file
 
-This is the README for your extension "vscode-go-to-file". After writing up a brief description, we recommend including the following sections.
+A plugin that aims to replicate some of Vim's "go to file" (`gf`) functionality.
+
+A huge amount of credit goes to [fr43nk/seito-openfile](https://github.com/fr43nk/seito-openfile), whose plugin I used for the base of my work. I preferred to build my version as a standalone plugin in order to give me a plugin to work with as I learn more of the VSCode extension API.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+When your cursor is hovering over a file path, invoke this plugin to be taken to that file. For example, given this code:
 
-For example if there is an image subfolder under your extension project workspace:
+```js
+import foo from "./foo";
+```
 
-\!\[feature X\]\(images/feature-x.png\)
+If your cursor is over the `'./foo'` string, you will be taken to the file.
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+When an extension is missing, the plugin will attempt to try `.js`, `.jsx`, `.scss` and `.css` by default.
+
+This plugin will also attempt to parse a `jsconfig.json` if it exists in order to find the file, so it should be able to parse aliases. For example, with these paths in `jsconfig.json`:
+
+```js
+"paths": {
+  "frontend/*": ["./frontend/*"],
+  "testing/*": ["./src/testing/*"]
+},
+```
+
+And an import of:
+
+```js
+import foo from "frontend/foo";
+```
+
+Invoking this plugin will take you to `frontend/foo.js` correctly. If not, please raise an issue!
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
+By default this package does not bind to a key command. You should bind your own key to the command `vscodeGoToFile.goToFile`.
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
+### 0.0.1
 
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
------------------------------------------------------------------------------------------------------------
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+Initial release.
